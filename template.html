@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的技能 · 工具榜</title>
+<style>
+:root{
+  --bg:#faf9f6; --bg-sunk:#f3f3ef; --bg-muted:#e9ede9; --surface:#fff; --surface-2:#fdfdfb;
+  --sidebar:#fdfdfb; --daybar:#f0f2ee;
+  --ink:#202a30; --ink-2:#303c42; --ink-3:#59656b; --ink-4:#657176;
+  --line:#dfe4e1; --line-strong:#d1d9d5; --line-soft:#e9ede9;
+  --accent:#176b75; --accent-ink:#145f68; --accent-soft:rgba(23,107,117,.10); --accent-contrast:#fff;
+  --hot:#b3402a; --hot-soft:rgba(179,64,42,.10);
+  --amber:#b8873a; --amber-ink:#7c5a24; --amber-soft:rgba(184,135,58,.12);
+  --ok:#2f7d5c; --ok-soft:rgba(47,125,92,.12); --ok-ink:#2a6e51;
+  --rank-1:#b3402a; --rank-2:#a3642f; --rank-3:#96702e; --rank-rest:#6b7684;
+  --shadow-card:0 1px 2px rgba(32,42,48,.04);
+  --shadow-card-hover:0 3px 12px rgba(32,42,48,.09);
+  --shadow-pop:0 12px 32px rgba(28,39,51,.14);
+  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  color-scheme:light;
+}
+html.dark{
+  --bg:#161a1c; --bg-sunk:#1d2225; --bg-muted:#232a2d; --surface:#1e2427; --surface-2:#21282b;
+  --sidebar:#191f21; --daybar:#20262a;
+  --ink:#dfe5e2; --ink-2:#cfd8d4; --ink-3:#93a09b; --ink-4:#7c8983;
+  --line:#2c3438; --line-strong:#3a4449; --line-soft:#262d30;
+  --accent:#53aab3; --accent-ink:#6dbfc8; --accent-soft:rgba(83,170,179,.14); --accent-contrast:#0d1416;
+  --hot:#e0684f; --hot-soft:rgba(224,104,79,.14);
+  --amber:#d4a05c; --amber-ink:#d4a05c; --amber-soft:rgba(212,160,92,.14);
+  --ok:#5cae8a; --ok-soft:rgba(92,174,138,.14); --ok-ink:#5cae8a;
+  --rank-1:#e0684f; --rank-2:#d49a5c; --rank-3:#c8b05c; --rank-rest:#8a97a3;
+  --shadow-card:0 1px 2px rgba(0,0,0,.25);
+  --shadow-card-hover:0 3px 14px rgba(0,0,0,.4);
+  --shadow-pop:0 12px 32px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+::selection{background:rgba(23,107,117,.25)}
+html.dark ::selection{background:rgba(83,170,179,.3)}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:14px;line-height:1.6;transition:background .24s,color .24s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+.mono{font-family:var(--font-mono)}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+.topbar-inner{max-width:1200px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left));height:52px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:8px;font-size:16.5px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+.logo .mark{width:22px;height:22px;border-radius:6px;background:var(--accent);color:var(--accent-contrast);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.logo small{font-weight:500;color:var(--ink-4);font-size:12px;margin-left:2px}
+.searchwrap{flex:1;max-width:420px;position:relative;margin-left:auto}
+.searchwrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-4);pointer-events:none}
+#search{width:100%;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);padding:0 30px 0 32px;font-size:13px;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+#search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#search::placeholder{color:var(--ink-4)}
+.clearbtn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:6px;display:none;align-items:center;justify-content:center;color:var(--ink-4)}
+.clearbtn:hover{background:var(--bg-sunk);color:var(--ink-2)}
+.searchwrap.hasval .clearbtn{display:inline-flex}
+.count-pill{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent-ink);font-size:12px;font-weight:600;white-space:nowrap}
+.theme-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3);transition:.15s}
+.theme-btn:hover{background:var(--bg-sunk);color:var(--ink)}
+.theme-btn .ico-moon,.theme-btn .ico-sun,.theme-btn .ico-auto{display:none}
+html:not(.dark):not(.auto) .theme-btn .ico-sun{display:block}
+html.dark:not(.auto) .theme-btn .ico-moon{display:block}
+html.auto .theme-btn .ico-auto{display:block}
+
+/* ---------- channel tabs ---------- */
+.tabsbar{position:sticky;top:52px;z-index:40;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+.tabs-inner{max-width:1200px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left));display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tabs-inner::-webkit-scrollbar{display:none}
+.tab{padding:9px 13px;font-size:13.5px;color:var(--ink-3);border-radius:8px 8px 0 0;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;position:relative;top:1px}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--accent-ink);font-weight:600;border-bottom-color:var(--accent)}
+.tab .n{font-family:var(--font-mono);font-size:11px;color:var(--ink-4);margin-left:3px;font-weight:500}
+
+/* ---------- layout ---------- */
+.main{max-width:1200px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-left)) 80px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+@media(max-width:1023px){.main{grid-template-columns:minmax(0,1fr)}.side{display:none}}
+
+/* note strip */
+.note{display:flex;gap:10px;background:var(--amber-soft);border:1px solid transparent;border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:var(--amber-ink);line-height:1.65}
+.note b{font-weight:650}
+.note code{font-family:var(--font-mono);font-size:12px;background:var(--bg-sunk);padding:1px 5px;border-radius:5px;color:var(--ink-2)}
+
+/* ---------- group daybar ---------- */
+.daybar{position:sticky;top:96px;z-index:30;display:flex;align-items:baseline;gap:10px;background:var(--daybar);border-radius:10px;padding:8px 14px;margin:6px 0 4px}
+.daybar .t{font-size:13px;font-weight:650;color:var(--ink-2)}
+.daybar .c{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-4)}
+.daybar .path{font-family:var(--font-mono);font-size:11px;color:var(--ink-4);margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46%}
+
+/* ---------- timeline feed ---------- */
+.slot{display:grid;grid-template-columns:56px 22px minmax(0,1fr);margin-bottom:14px}
+.slot .when{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--ink-3);padding-top:17px;text-align:right;padding-right:4px}
+.slot .rail{position:relative}
+.slot .rail .ln{position:absolute;left:10.5px;top:29px;bottom:-14px;width:1px;background:var(--line-strong)}
+.slot.last .rail .ln{display:none}
+.slot .rail .dot{position:absolute;left:7.5px;top:21px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--bg);transition:transform .3s}
+.slot:hover .rail .dot{transform:scale(1.3)}
+@media(max-width:640px){
+  .slot{grid-template-columns:minmax(0,1fr)}
+  .slot .when{display:none}.slot .rail{display:none}
+}
+.card{position:relative;background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:15px 18px 13px;box-shadow:var(--shadow-card);transition:box-shadow .24s,border-color .24s,transform .24s;cursor:pointer}
+.card:hover{box-shadow:var(--shadow-card-hover);border-color:var(--line);transform:translateY(-1px)}
+.card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-4)}
+.kind{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 8px;border-radius:99px;font-size:11px;font-weight:500;line-height:1}
+.kind.skill{background:var(--amber-soft);color:var(--amber-ink)}
+.kind.plugin{background:var(--ok-soft);color:var(--ok-ink)}
+.kind.mcp{background:var(--hot-soft);color:var(--hot)}
+.kind.cli{background:var(--accent-soft);color:var(--accent-ink)}
+.kind .pt{width:5px;height:5px;border-radius:50%;background:currentColor}
+.src-badge{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent-ink);border:1px solid rgba(23,107,117,.14);font-size:11px;font-weight:500}
+html.dark .src-badge{border-color:rgba(83,170,179,.2)}
+.src-badge b{font-weight:700}
+.copybtn{width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-4);transition:.15s}
+.copybtn:hover{background:var(--bg-sunk);color:var(--ink-2)}
+.copybtn.done{color:var(--ok)}
+.card h3{margin-top:8px;font-size:16.5px;font-weight:650;line-height:1.5;color:var(--ink)}
+.card h3 .ver{font-family:var(--font-mono);font-size:11.5px;font-weight:500;color:var(--ink-4);margin-left:6px}
+.card .sum{margin-top:5px;font-size:13.5px;line-height:1.65;color:var(--ink-3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card.open .sum{-webkit-line-clamp:unset}
+.card .fpath{margin-top:9px;font-family:var(--font-mono);font-size:11px;color:var(--ink-4);background:var(--bg-sunk);border-radius:7px;padding:4px 9px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card.open .fpath{white-space:normal;word-break:break-all}
+
+/* ---------- sidebar ---------- */
+.side{position:sticky;top:112px;display:flex;flex-direction:column;gap:18px}
+.panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:16px 16px 10px;box-shadow:var(--shadow-card)}
+.panel h4{font-size:13px;font-weight:650;color:var(--ink-2);display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.panel h4 .fire{color:var(--hot)}
+.rank-item{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line-soft);cursor:pointer;border-radius:6px}
+.rank-item:last-child{border-bottom:none}
+.rank-item:hover .rn{color:var(--ink)}
+.rank-no{font-family:var(--font-mono);font-size:13px;font-weight:700;font-style:italic;width:16px;text-align:center;flex-shrink:0}
+.r1{color:var(--rank-1)}.r2{color:var(--rank-2)}.r3{color:var(--rank-3)}.rx{color:var(--rank-rest)}
+.rank-body{min-width:0;flex:1}
+.rank-body .rn{font-size:13px;font-weight:550;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-body .rs{font-size:11px;color:var(--ink-4)}
+.rank-date{font-family:var(--font-mono);font-size:11px;color:var(--ink-4);flex-shrink:0}
+.stat-row{display:flex;align-items:center;gap:9px;padding:7px 2px;cursor:pointer;border-radius:6px}
+.stat-row:hover{background:var(--bg-sunk)}
+.stat-row .lab{font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.stat-row .bar{flex:1;height:5px;border-radius:99px;background:var(--bg-muted);overflow:hidden}
+.stat-row .bar i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .5s}
+.stat-row .num{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--ink-3);width:26px;text-align:right}
+.side-note{font-size:11.5px;color:var(--ink-4);line-height:1.7;padding:2px 4px}
+
+/* empty state */
+.empty{text-align:center;padding:70px 20px;color:var(--ink-4)}
+.empty .big{font-size:38px;margin-bottom:10px}
+.empty p{font-size:13.5px}
+
+footer{max-width:1200px;margin:0 auto;padding:26px 16px 40px;color:var(--ink-4);font-size:12px;text-align:center;border-top:1px solid var(--line-soft)}
+footer .mono{font-size:11px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><span class="mark">技</span>我的技能·工具榜<small>Dashboard</small></div>
+    <div class="searchwrap" id="searchwrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search" type="text" placeholder="搜索名称、描述或路径…" autocomplete="off">
+      <button class="clearbtn" id="clearbtn" title="清空"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <span class="count-pill" id="countpill">—</span>
+    <button class="theme-btn" id="themebtn" title="切换主题（浅色 / 深色 / 跟随系统）">
+      <svg class="ico-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="ico-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      <svg class="ico-auto" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="tabsbar"><div class="tabs-inner" id="tabs"></div></nav>
+
+<div class="main">
+  <div>
+    <div class="note">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:3px"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16.5v.01"/></svg>
+      <div id="notetext"></div>
+    </div>
+    <div id="feed"></div>
+  </div>
+  <aside class="side">
+    <div class="panel">
+      <h4><span class="fire">🔥</span>最近更新榜</h4>
+      <div id="ranklist"></div>
+    </div>
+    <div class="panel">
+      <h4>🗂 分类统计</h4>
+      <div id="statlist"></div>
+    </div>
+    <div class="side-note" id="scannednote"></div>
+  </aside>
+</div>
+
+<footer>
+  <div>数据为本机扫描快照 · 位置：<span class="mono">~/.agents · ~/.codex · ~/.claude · ~/.cursor · ~/.zcode</span></div>
+  <div class="mono" id="ftstat" style="margin-top:4px"></div>
+</footer>
+
+<script>
+const DATA = __DATA__;
+const SOURCE_ORDER = ["Agents 通用","Codex","ZCode 插件","ZCode","Claude","Claude 插件","Cursor","OpenClaw","Hub 视频创意","WorkBuddy","MiniMax 内置","42plugin","Kimi","项目内","命令行 CLI","MCP 服务器"];
+const SOURCE_PATHS = {
+  "Agents 通用":"~/.agents/skills","Codex":"~/.codex/skills","ZCode 插件":"~/.zcode/cli/plugins","ZCode":"~/.zcode/skills","Claude":"~/.claude/skills","Claude 插件":"~/.claude/plugins","Cursor":"~/.cursor/skills-cursor","OpenClaw":"~/.openclaw-autoclaw/skills","Hub 视频创意":"~/.hub/skills","WorkBuddy":"~/.workbuddy/skills","MiniMax 内置":"~/.minimax/.builtin-skills","42plugin":"~/.42plugin/builtin","Kimi":"~/.kimi/daimon/skills","项目内":"各项目目录","命令行 CLI":"~/.local/bin · ~/.local/node-arm64/bin","MCP 服务器":"mcp 配置"
+};
+const KIND_LABEL = {skill:"技能",plugin:"插件",mcp:"MCP",cli:"CLI"};
+const SCAN_DATE = "__SCAN_DATE__";
+
+/* ---------- theme ---------- */
+const modes = ["light","dark","auto"];
+let mode = localStorage.getItem("sk-theme") || "auto";
+function applyMode(){
+  document.documentElement.classList.remove("dark","auto");
+  if(mode === "dark") document.documentElement.classList.add("dark");
+  if(mode === "auto"){
+    document.documentElement.classList.add("auto");
+    const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.toggle("dark", dark);
+  }
+  localStorage.setItem("sk-theme", mode);
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ if(mode==="auto") applyMode(); });
+document.getElementById("themebtn").onclick = ()=>{ mode = modes[(modes.indexOf(mode)+1)%3]; applyMode(); };
+applyMode();
+
+/* ---------- state ---------- */
+let activeTab = "全部";
+let query = "";
+const $ = id => document.getElementById(id);
+
+function matches(item){
+  if(activeTab !== "全部" && item.source !== activeTab) return false;
+  if(!query) return true;
+  const q = query.toLowerCase();
+  return (item.name+" "+item.desc+" "+item.path+" "+item.source).toLowerCase().includes(q);
+}
+
+/* ---------- tabs ---------- */
+function renderTabs(){
+  const counts = {}; DATA.forEach(d=>counts[d.source]=(counts[d.source]||0)+1);
+  let html = `<button class="tab ${activeTab==="全部"?"active":""}" data-t="全部">全部<span class="n">${DATA.length}</span></button>`;
+  SOURCE_ORDER.forEach(s=>{
+    if(!counts[s]) return;
+    html += `<button class="tab ${activeTab===s?"active":""}" data-t="${s}">${s}<span class="n">${counts[s]}</span></button>`;
+  });
+  $("tabs").innerHTML = html;
+  $("tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ activeTab=b.dataset.t; renderTabs(); renderFeed(); });
+}
+
+/* ---------- feed ---------- */
+function fmtDate(d){ if(!d) return "—"; return d.slice(5).replace("-","·"); }
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function renderFeed(){
+  const list = DATA.filter(matches);
+  const counts2 = {}; list.forEach(i=>counts2[i.source]=(counts2[i.source]||0)+1);
+  const groups = SOURCE_ORDER.filter(s=>list.some(i=>i.source===s)).sort((a,b)=>counts2[b]-counts2[a]);
+  let html = "";
+  if(!list.length){
+    html = `<div class="empty"><div class="big">🔍</div><p>没有匹配「${esc(query)}」的条目，换个关键词试试</p></div>`;
+  }
+  groups.forEach(s=>{
+    const items = list.filter(i=>i.source===s).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+    html += `<div class="daybar"><span class="t">${s}</span><span class="c">${items.length} 条</span><span class="path">${SOURCE_PATHS[s]||""}</span></div>`;
+    items.forEach((it,idx)=>{
+      const last = idx===items.length-1;
+      html += `
+      <div class="slot ${last?"last":""}">
+        <div class="when">${fmtDate(it.date)}</div>
+        <div class="rail"><span class="ln"></span><span class="dot"></span></div>
+        <article class="card" data-path="${esc(it.path)}">
+          <div class="card-head">
+            <span class="kind ${it.kind}"><span class="pt"></span>${KIND_LABEL[it.kind]||it.kind}</span>
+            <span class="mono">${it.date||""}</span>
+            <span class="src-badge">${esc(it.clients ? "客户端 · "+it.clients : it.source)}<b></b></span>
+            <button class="copybtn" title="复制路径" data-copy="${esc(it.path)}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            </button>
+          </div>
+          <h3>${esc(it.name)}${it.version?`<span class="ver">v${esc(it.version)}</span>`:""}</h3>
+          <p class="sum">${esc(it.desc)||"<i style='color:var(--ink-4)'>（无描述）</i>"}</p>
+          <div class="fpath">${esc(it.path)}</div>
+        </article>
+      </div>`;
+    });
+  });
+  $("feed").innerHTML = html;
+  // interactions
+  $("feed").querySelectorAll(".card").forEach(c=>{
+    c.addEventListener("click",e=>{
+      if(e.target.closest(".copybtn")) return;
+      c.classList.toggle("open");
+    });
+  });
+  $("feed").querySelectorAll(".copybtn").forEach(b=>{
+    b.addEventListener("click",e=>{
+      e.stopPropagation();
+      const val = b.dataset.copy;
+      (navigator.clipboard ? navigator.clipboard.writeText(val) : Promise.reject()).then(()=>{
+        b.classList.add("done"); b.title = "已复制";
+        setTimeout(()=>{ b.classList.remove("done"); b.title="复制路径"; }, 1400);
+      }).catch(()=>{ alert(val); });
+    });
+  });
+  $("countpill").textContent = `${list.length} / ${DATA.length} 项`;
+}
+
+/* ---------- rank ---------- */
+function renderRank(){
+  const top = DATA.filter(d=>d.date).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+  $("ranklist").innerHTML = top.map((d,i)=>{
+    const cls = i===0?"r1":i===1?"r2":i===2?"r3":"rx";
+    return `<div class="rank-item" data-name="${esc(d.name)}">
+      <span class="rank-no ${cls}">${i+1}</span>
+      <div class="rank-body"><div class="rn">${esc(d.name)}</div><div class="rs">${esc(d.source)} · ${KIND_LABEL[d.kind]||""}</div></div>
+      <span class="rank-date">${fmtDate(d.date)}</span>
+    </div>`;
+  }).join("");
+  $("ranklist").querySelectorAll(".rank-item").forEach(r=>{
+    r.onclick = ()=>{
+      $("search").value = query = r.dataset.name;
+      activeTab = "全部"; renderTabs();
+      $("searchwrap").classList.add("hasval");
+      renderFeed(); window.scrollTo({top:0,behavior:"smooth"});
+    };
+  });
+}
+
+/* ---------- stats ---------- */
+function renderStats(){
+  const counts = {}; DATA.forEach(d=>counts[d.source]=(counts[d.source]||0)+1);
+  const max = Math.max(...Object.values(counts));
+  $("statlist").innerHTML = SOURCE_ORDER.filter(s=>counts[s]).map(s=>`
+    <div class="stat-row" data-s="${s}">
+      <span class="lab">${s}</span>
+      <span class="bar"><i style="width:${Math.round(counts[s]/max*100)}%"></i></span>
+      <span class="num">${counts[s]}</span>
+    </div>`).join("");
+  $("statlist").querySelectorAll(".stat-row").forEach(r=>{
+    r.onclick = ()=>{ activeTab = r.dataset.s; query=""; $("search").value=""; $("searchwrap").classList.remove("hasval"); renderTabs(); renderFeed(); window.scrollTo({top:0,behavior:"smooth"}); };
+  });
+}
+
+/* ---------- search ---------- */
+let debounce;
+$("search").addEventListener("input", e=>{
+  $("searchwrap").classList.toggle("hasval", !!e.target.value);
+  clearTimeout(debounce);
+  debounce = setTimeout(()=>{ query = e.target.value.trim(); renderFeed(); }, 120);
+});
+$("clearbtn").onclick = ()=>{ $("search").value=""; query=""; $("searchwrap").classList.remove("hasval"); renderFeed(); };
+
+/* ---------- boot ---------- */
+$("notetext").innerHTML = `这份清单是 <b>${SCAN_DATE}</b> 对本机的全量扫描快照，共 <b>${DATA.length}</b> 项、16 个来源。几个亮点：最大的收藏是 <b>OpenClaw（80 个技能）</b>；<b>~/.hub/skills</b> 是一整套<b>视频/创意设计技能</b>（音乐视频、AE、Houdini、Blender、动漫 PV、短片生成——很可能就是你记忆里那套"视频设计流程"）；Firecrawl 全家桶通过符号链接共享给了 <b>17 个 AI 客户端</b>。点击卡片展开完整描述，右上角图标可复制安装路径。`;
+$("scannednote").innerHTML = `💡 技能装多了容易忘：直接在对话框输入 <b>/</b> 可唤起技能；本页为静态快照，之后新装了工具可让 ZCode 重新扫描生成。`;
+$("ftstat").textContent = `scanned ${SCAN_DATE} · ${DATA.length} items · style inspired by aihot.news`;
+renderTabs(); renderFeed(); renderRank(); renderStats();
+</script>
+</body>
+</html>
